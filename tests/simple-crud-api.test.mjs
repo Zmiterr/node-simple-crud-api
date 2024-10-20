@@ -1,5 +1,8 @@
-const supertest = require('supertest');
-const users = require('../src/users');
+import supertest from "supertest";
+import {users} from "../src/users.mjs";
+import {afterAll, beforeAll, describe, it} from "@jest/globals";
+
+
 
 const api = supertest(`http://localhost:4000`);
 
@@ -67,7 +70,7 @@ describe('Script from example', () => {
   it('Get must return 404 error', async () => {
     await api.get(`/user/${userId}`)
       .expect('Content-Type', /json/)
-      .expect('"ID not found"')
+      .expect({error: "ID not found"})
       .expect(404);
   });
 });
@@ -75,33 +78,33 @@ describe('Script from example', () => {
 describe('Script check errors', () => {
   const invalidId = 'Invalid ID';
   const absent = '61eb8e5e-b734-4296-98f4-40aec1e6606c';
+
   it('Get with invalid id must return 400 error', async () => {
     await api.get(`/user/${invalidId}`)
-      .expect('Content-Type', /json/)
-      .expect('"invalid ID"')
-      .expect(400);
+        .expect('Content-Type', /json/)
+        .expect({ error: 'wrong or empty id parameter!' })
+        .expect(400);
   });
 
   it('Put with invalid id must return 400 error', async () => {
     await api.put(`/user/${invalidId}`)
-      .send(modifiedBody)
-      .expect('Content-Type', /json/)
-      .expect('"wrong or empty id parameter!"')
-      .expect(400);
+        .send(modifiedBody)
+        .expect('Content-Type', /json/)
+        .expect({ error: 'Invalid ID' })
   });
 
   it('Delete with invalid id must return 400 error', async () => {
     await api.delete(`/user/${invalidId}`)
-
-      .expect('Content-Type', /json/)
-      .expect('"invalid ID"')
-      .expect(400);
+        .expect('Content-Type', /json/)
+        .expect({ error: 'Invalid ID' }) // Обновлено для проверки объекта
+        .expect(400);
   });
-  it('Delete with absent id must return 400 error', async () => {
+
+  it('Delete with absent id must return 404 error', async () => {
     await api.delete(`/user/${absent}`)
-      .expect('Content-Type', /json/)
-      .expect('"ID not found"')
-      .expect(404);
+        .expect('Content-Type', /json/)
+        .expect({ error: 'ID not found' }) // Обновлено для проверки объекта
+        .expect(404);
   });
 });
 
@@ -129,51 +132,34 @@ describe('Script body validator', () => {
     hobbies: ['guitar', 'codding'],
   };
 
-  // beforeAll(async () => {
-  //   await api.post('/user')
-  //     .send(body);
-  //   const response = await api.get('/user');
-  //   userId = response.body[0].id;
-  // });
-
   it('Post must return 400 without name', async () => {
     await api.post('/user')
       .send(noNameBody)
-      .expect('"absent is required params"')
+      .expect({error: "absent is required params"})
       .expect(400);
   });
   it('Post must return 400 without age', async () => {
     await api.post('/user')
       .send(noAgeBody)
-      .expect('"absent is required params"')
+      .expect({error: "absent is required params"})
       .expect(400);
   });
   it('Post must return 400 without hobbies', async () => {
     await api.post('/user')
       .send(noHobbiesBody)
-      .expect('"empty or invalid hobbies parameter"')
+      .expect({error: "empty or invalid hobbies parameter"})
       .expect(400);
   });
   it('Post must return 400 with wrong hobbies', async () => {
     await api.post('/user')
       .send(invalidHobbiesBody)
-      .expect('"empty or invalid hobbies parameter"')
+      .expect({error: "empty or invalid hobbies parameter"})
       .expect(400);
   });
   it('Post must return 400 with wrong age', async () => {
     await api.post('/user')
       .send(invalidAgeBody)
-      .expect('"can\'t convert age parameter to string"')
+      .expect({error: "can\'t convert age parameter to string"})
       .expect(400);
   });
 });
-
-// let app;
-//
-// beforeAll(() => {
-//   app = require("../src/server"); // или альтернативно тут же app.listen
-// });
-//
-// afterAll(() => {
-//   app.close();
-// });
