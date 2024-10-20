@@ -1,4 +1,4 @@
-const validateParams = (name, age, hobbies) => {
+export const validateParams = (name, age, hobbies) => {
   if (!name || !age) {
     const message = 'absent is required params';
     return { valid: false, message };
@@ -19,4 +19,3 @@ const validateParams = (name, age, hobbies) => {
   return { valid: true, userObject };
 };
 
-module.exports = validateParams;

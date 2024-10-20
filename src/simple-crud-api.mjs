@@ -1,12 +1,12 @@
-const http = require('http');
-require('dotenv').config();
-const { validate, v4: uuidv4 } = require('uuid');
-let users = require('./users');
-const validateParams = require('./validate-params');
+import http from "http";
+import { config } from "dotenv";
+import { v4 as uuidv4, validate } from "uuid";
+import { validateParams } from "./validate-params.mjs";
+import { users } from "./users.mjs";
 
+config();
 const PORT = process.env.PORT || 4000;
 
-// Регулярное выражение для идентификаторов персон
 const userIdPattern = /\/user\/\w+/;
 
 const sendResponse = (res, code, data = null) => {
@@ -34,13 +34,12 @@ const getRequestData = (req) =>
     });
 
 const handleGetAllUsers = (res) => {
-  // Return all users, even if the list is empty
   sendResponse(res, 200, users);
 };
 
 const handleGetUserById = (res, userId) => {
   if (!validate(userId)) {
-    return sendError(res, 400, 'Invalid ID');
+    return sendError(res, 400, 'wrong or empty id parameter!');
   }
 
   const user = users.find((p) => p.id === userId);
@@ -51,7 +50,7 @@ const handleGetUserById = (res, userId) => {
   }
 };
 
-const handleCreateuser = async (req, res) => {
+const handleCreateUser = async (req, res) => {
   try {
     const { name, age, hobbies } = await getRequestData(req);
     const validatedUser = validateParams(name, age, hobbies);
@@ -60,15 +59,15 @@ const handleCreateuser = async (req, res) => {
       return sendError(res, 400, validatedUser.message);
     }
 
-    const newuser = { id: uuidv4(), ...validatedUser.userObject };
-    users.push(newuser);
-    sendResponse(res, 201, newuser);
+    const newUser = { id: uuidv4(), ...validatedUser.userObject };
+    users.push(newUser);
+    sendResponse(res, 201, newUser);
   } catch (error) {
-    sendError(res, 400, error);
+    sendError(res, 400, 'Invalid request body');
   }
 };
 
-const handleUpdateuser = async (req, res, userId) => {
+const handleUpdateUser = async (req, res, userId) => {
   if (!validate(userId)) {
     return sendError(res, 400, 'Invalid ID');
   }
@@ -116,9 +115,9 @@ const server = http.createServer(async (req, res) => {
   } else if (req.method === 'GET' && userIdPattern.test(req.url)) {
     handleGetUserById(res, userId);
   } else if (req.method === 'POST' && (req.url === '/user' || req.url === '/user/')) {
-    await handleCreateuser(req, res);
+    await handleCreateUser(req, res);
   } else if (req.method === 'PUT' && userIdPattern.test(req.url)) {
-    await handleUpdateuser(req, res, userId);
+    await handleUpdateUser(req, res, userId);
   } else if (req.method === 'DELETE' && userIdPattern.test(req.url)) {
     handleDeleteUser(res, userId);
   } else {
