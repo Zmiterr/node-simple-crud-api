@@ -5,6 +5,7 @@
   "type": "module",
   "main": "src/simple-crud-api.ts",
   "scripts": {
+    "start:multi": "node --loader ts-node/esm cluster.js",
     "start": "nodemon --exec ts-node --esm src/simple-crud-api.ts",
     "dev": "nodemon --watch 'src/**/*.ts' --exec ts-node --esm src/simple-crud-api.ts",
     "prod": "webpack --config-name prod",
