@@ -1,5 +1,5 @@
 import supertest from "supertest";
-import {users} from "../src/users.mjs";
+import {users} from "../src/users.ts";
 import {afterAll, beforeAll, describe, it} from "@jest/globals";
 
 
@@ -82,7 +82,7 @@ describe('Script check errors', () => {
   it('Get with invalid id must return 400 error', async () => {
     await api.get(`/user/${invalidId}`)
         .expect('Content-Type', /json/)
-        .expect({ error: 'wrong or empty id parameter!' })
+        .expect({ error: 'Wrong or empty id parameter!' })
         .expect(400);
   });
 
@@ -135,31 +135,31 @@ describe('Script body validator', () => {
   it('Post must return 400 without name', async () => {
     await api.post('/user')
       .send(noNameBody)
-      .expect({error: "absent is required params"})
+      .expect({error: "Both name and age are required parameters"})
       .expect(400);
   });
   it('Post must return 400 without age', async () => {
     await api.post('/user')
       .send(noAgeBody)
-      .expect({error: "absent is required params"})
+      .expect({error: "Both name and age are required parameters"})
       .expect(400);
   });
   it('Post must return 400 without hobbies', async () => {
     await api.post('/user')
       .send(noHobbiesBody)
-      .expect({error: "empty or invalid hobbies parameter"})
+      .expect({error: "Hobbies parameter is empty or invalid"})
       .expect(400);
   });
   it('Post must return 400 with wrong hobbies', async () => {
     await api.post('/user')
       .send(invalidHobbiesBody)
-      .expect({error: "empty or invalid hobbies parameter"})
+      .expect({error: "Hobbies parameter is empty or invalid"})
       .expect(400);
   });
   it('Post must return 400 with wrong age', async () => {
     await api.post('/user')
       .send(invalidAgeBody)
-      .expect({error: "can\'t convert age parameter to string"})
+      .expect({error: "Cannot convert age parameter to number"})
       .expect(400);
   });
 });
